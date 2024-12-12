@@ -4,20 +4,41 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Mentor;
+use App\Models\Chapter;
+use App\Models\Course;
 
-class MentorController extends Controller
+class ChapterController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $mentors = Mentor::query();
+        $chapters = Chapter::query();
+
+        $key = $request->query('key');
+
+        $chapters->when($key, function($query) use ($key) {
+            return $query->where('name', 'like', "%{$key}%");
+        });
+
+        $course_id = $request->query('course_id');
+        $chapters->when($course_id, function($query) use ($course_id) {
+            return $query->where('course_id', $course_id);
+        });
+
         return response()->json([
             'status' => 'success',
-            'data' => $mentors->paginate(10)
+            'data' => $chapters->paginate(10)
         ], 200);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
     }
 
     /**
@@ -27,9 +48,7 @@ class MentorController extends Controller
     {
         $rules = [
             'name' => 'required|string',
-            'profile_url' => 'required|url',
-            'email' => 'required|email',
-            'profession' => 'required|string',
+            'course_id' => 'required|exists:courses,id'
         ];
 
         $data = $request->all();
@@ -38,19 +57,18 @@ class MentorController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
+               'status' => 'error',
                 'error' => $validator->errors()
             ], 400);
         }
 
-        $mentor = Mentor::create($data);
+        $chapter = Chapter::create($data);
 
         return response()->json([
             'status' => 'success',
-            'data' => $mentor,
-            'message' => 'Mentor created successfully'
+            'data' => $chapter,
+           'message' => 'Chapter created successfully'
         ], 200);
-
     }
 
     /**
@@ -58,18 +76,18 @@ class MentorController extends Controller
      */
     public function show(string $id)
     {
-        $mentor = Mentor::find($id);
+        $chapter = Chapter::find($id);
 
-        if (!$mentor) {
+        if (!$chapter) {
             return response()->json([
                'status' => 'error',
-               'message' => 'Mentor not found'
+               'message' => 'Chapter not found'
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $mentor
+            'data' => $chapter
         ], 200);
     }
 
@@ -80,9 +98,7 @@ class MentorController extends Controller
     {
         $rules = [
             'name' => 'string',
-            'profile_url' => 'url',
-            'email' => 'email',
-            'profession' => 'string',
+            'course_id' => 'exists:courses,id'
         ];
 
         $data = $request->all();
@@ -91,27 +107,27 @@ class MentorController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
+               'status' => 'error',
                 'error' => $validator->errors()
             ], 400);
         }
 
-        $mentor = Mentor::find($id);
+        $chapter = Chapter::find($id);
 
-        if (!$mentor) {
+        if (!$chapter) {
             return response()->json([
                'status' => 'error',
-               'message' => 'Mentor not found'
+               'message' => 'Chapter not found'
             ], 404);
         }
 
-        $mentor->fill($data);
-        $mentor->save();
+        $chapter->fill($data);
+        $chapter->save();
 
         return response()->json([
             'status' => 'success',
-            'data' => $mentor,
-            'message' => 'Mentor updated successfully'
+            'data' => $chapter,
+           'message' => 'Chapter updated successfully'
         ], 200);
     }
 
@@ -120,20 +136,20 @@ class MentorController extends Controller
      */
     public function destroy(string $id)
     {
-        $mentor = Mentor::find($id);
+        $chapter = Chapter::find($id);
 
-        if (!$mentor) {
+        if (!$chapter) {
             return response()->json([
                'status' => 'error',
-               'message' => 'Mentor not found'
+               'message' => 'Chapter not found'
             ], 404);
         }
 
-        $mentor->delete();
+        $chapter->delete();
 
         return response()->json([
-           'status' => 'success',
-           'message' => 'Mentor deleted successfully'
+            'status' => 'success',
+           'message' => 'Chapter deleted successfully'
         ], 200);
     }
 }

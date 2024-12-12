@@ -12,9 +12,25 @@ class CourseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $courses = Course::query();
+
+        $key = $request->query('key');
+        $status = $request->query('status');
+
+        $courses->when($key, function($query) use ($key) {
+            return $query->where('name', 'LIKE', '%'.strtolower($key).'%');
+        });
+
+        $courses->when($status, function($query) use ($status) {
+            return $query->where('status', $status);
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $courses->paginate(10)
+        ], 200);
     }
 
     /**
@@ -67,7 +83,19 @@ class CourseController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $course = Course::find($id);
+
+        if (!$course) {
+            return response()->json([
+               'status' => 'error',
+               'message' => 'Course not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $course
+        ], 200);
     }
 
     /**
@@ -83,7 +111,46 @@ class CourseController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $rules = [
+            'name' => 'string',
+            'thumbnail' => 'string|url',
+            'type' => 'in:free,premium',
+            'status' => 'in:draft,published',
+            'price' => 'numeric',
+            'level' => 'in:all-level,beginner,intermediate,advance',
+            'description' => 'string',
+            'is_certificate' => 'boolean',
+            'mentor_id' => 'exists:mentors,id'
+        ];
+
+        $data = $request->all();
+
+        $validator = Validator::make($data, $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'error' => $validator->errors()
+            ], 400);
+        }
+
+        $course = Course::find($id);
+
+        if (!$course) {
+            return response()->json([
+               'status' => 'error',
+               'message' => 'Course not found'
+            ], 404);
+        }
+
+        $course->fill($data);
+        $course->save();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $course,
+           'message' => 'Course updated successfully'
+        ], 200);
     }
 
     /**
@@ -91,6 +158,20 @@ class CourseController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $course = Course::find($id);
+
+        if (!$course) {
+            return response()->json([
+               'status' => 'error',
+               'message' => 'Course not found'
+            ], 404);
+        }
+
+        $course->delete();
+
+        return response()->json([
+           'status' => 'success',
+           'message' => 'Course deleted successfully'
+        ], 200);
     }
 }
