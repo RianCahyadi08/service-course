@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MentorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\LessonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +35,9 @@ Route::put('/chapters/{id}', [ChapterController::class, 'update']);
 Route::get('/chapters', [ChapterController::class, 'index']);
 Route::get('/chapters/{id}', [ChapterController::class, 'show']);
 Route::delete('/chapters/{id}', [ChapterController::class, 'destroy']);
+
+Route::post('/lessons', [LessonController::class, 'store']);
+Route::put('/lessons/{id}', [LessonController::class, 'update']);
+Route::get('/lessons', [LessonController::class, 'index']);
+Route::get('/lessons/{id}', [LessonController::class, 'show']);
+Route::delete('/lessons/{id}', [LessonController::class, 'destroy']);
