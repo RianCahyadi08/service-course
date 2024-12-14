@@ -6,6 +6,7 @@ use App\Http\Controllers\MentorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\ImageCourseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,3 +42,10 @@ Route::put('/lessons/{id}', [LessonController::class, 'update']);
 Route::get('/lessons', [LessonController::class, 'index']);
 Route::get('/lessons/{id}', [LessonController::class, 'show']);
 Route::delete('/lessons/{id}', [LessonController::class, 'destroy']);
+
+
+Route::post('/image-courses', [ImageCourseController::class,'store']);
+Route::put('/image-courses/{id}', [ImageCourseController::class, 'update']);
+Route::get('/image-courses', [ImageCourseController::class, 'index']);
+Route::get('/image-courses/{id}', [ImageCourseController::class, 'show']);
+Route::delete('/image-courses/{id}', [ImageCourseController::class, 'destroy']);

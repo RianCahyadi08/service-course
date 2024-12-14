@@ -3,34 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\ImageCourse;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Chapter;
-use App\Models\Course;
 
-class ChapterController extends Controller
+class ImageCourseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $chapters = Chapter::query();
-
-        $key = $request->query('key');
-
-        $chapters->when($key, function($query) use ($key) {
-            return $query->where('name', 'like', "%{$key}%");
-        });
-
-        $course_id = $request->query('course_id');
-        $chapters->when($course_id, function($query) use ($course_id) {
-            return $query->where('course_id', $course_id);
-        });
+        $imageCourses = ImageCourse::query();
 
         return response()->json([
             'status' => 'success',
-            'data' => $chapters->paginate(10)
+            'data' => $imageCourses->paginate(10)
         ], 200);
+
     }
 
     /**
@@ -39,8 +28,8 @@ class ChapterController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'name' => 'required|string',
-            'course_id' => 'required|exists:courses,id'
+            'course_id' =>'required|exists:courses,id',
+            'image' => 'required|url'
         ];
 
         $data = $request->all();
@@ -50,16 +39,16 @@ class ChapterController extends Controller
         if ($validator->fails()) {
             return response()->json([
                'status' => 'error',
-                'error' => $validator->errors()
-            ], 400);
+               'message' => $validator->errors()->first()
+            ], 422);
         }
 
-        $chapter = Chapter::create($data);
+        $imageCourse = ImageCourse::create($data);
 
         return response()->json([
-            'status' => 'success',
-            'data' => $chapter,
-           'message' => 'Chapter created successfully'
+           'status' => 'success',
+           'message' => 'Image uploaded successfully',
+           'data' => $imageCourse
         ], 200);
     }
 
@@ -68,18 +57,18 @@ class ChapterController extends Controller
      */
     public function show(string $id)
     {
-        $chapter = Chapter::find($id);
+        $imageCourse = ImageCourse::find($id);
 
-        if (!$chapter) {
+        if (!$imageCourse) {
             return response()->json([
                'status' => 'error',
-               'message' => 'Chapter not found'
+               'message' => 'Image not found'
             ], 404);
         }
 
         return response()->json([
-            'status' => 'success',
-            'data' => $chapter
+           'status' => 'success',
+           'data' => $imageCourse
         ], 200);
     }
 
@@ -89,8 +78,8 @@ class ChapterController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
-            'name' => 'string',
-            'course_id' => 'exists:courses,id'
+            'course_id' =>'exists:courses,id',
+            'image' => 'url'
         ];
 
         $data = $request->all();
@@ -100,26 +89,25 @@ class ChapterController extends Controller
         if ($validator->fails()) {
             return response()->json([
                'status' => 'error',
-                'error' => $validator->errors()
-            ], 400);
+               'message' => $validator->errors()->first()
+            ], 422);
         }
 
-        $chapter = Chapter::find($id);
+        $imageCourse = ImageCourse::find($id);
 
-        if (!$chapter) {
+        if (!$imageCourse) {
             return response()->json([
                'status' => 'error',
-               'message' => 'Chapter not found'
+               'message' => 'Image not found'
             ], 404);
         }
 
-        $chapter->fill($data);
-        $chapter->save();
+        $imageCourse->update($data);
 
         return response()->json([
-            'status' => 'success',
-            'data' => $chapter,
-           'message' => 'Chapter updated successfully'
+           'status' => 'success',
+           'message' => 'Image updated successfully',
+           'data' => $imageCourse
         ], 200);
     }
 
@@ -128,20 +116,20 @@ class ChapterController extends Controller
      */
     public function destroy(string $id)
     {
-        $chapter = Chapter::find($id);
+        $imageCourse = ImageCourse::find($id);
 
-        if (!$chapter) {
+        if (!$imageCourse) {
             return response()->json([
                'status' => 'error',
-               'message' => 'Chapter not found'
+               'message' => 'Image not found'
             ], 404);
         }
 
-        $chapter->delete();
+        $imageCourse->delete();
 
         return response()->json([
-            'status' => 'success',
-           'message' => 'Chapter deleted successfully'
+           'status' => 'success',
+           'message' => 'Image deleted successfully'
         ], 200);
     }
 }
